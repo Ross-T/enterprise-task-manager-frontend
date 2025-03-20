@@ -58,7 +58,7 @@ The Enterprise Task Manager frontend aims to provide an intuitive, responsive in
 ### Installation
 
 1. Clone the repository:
-   `git clone https://github.com/yourusername/enterprise-task-manager-frontend.git`
+   `git clone https://github.com/Ross-T/enterprise-task-manager-frontend.git`
    `cd enterprise-task-manager-frontend`
 
 2. Install dependencies:
@@ -193,3 +193,6 @@ We follow a GitFlow-inspired branching strategy:
 - `hotfix/*`: Urgent production fixes
 
 Pull requests require passing CI checks and code review approval before merging.
+
+### Backend Reference
+This frontend application communicates with the [Enterprise Task Manager Backend](https://github.com/Ross-T/enterprise-task-manager-backend) API.
