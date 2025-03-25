@@ -1,22 +1,39 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import CssBaseline from '@mui/material/CssBaseline';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import Layout from "./components/layout/Layout";
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+
+// Context Providers
+import { AuthProvider } from "./context/authContext";
+import { TaskProvider } from "./context/taskContext";
+import { ProjectProvider } from "./context/projectContext";
 
 // Components
-import Login from './components/auth/Login';
-import Register from './components/auth/Register';
-import Dashboard from './components/dashboard/Dashboard';
-import ProtectedRoute from './components/common/ProtectedRoute';
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
-// Create a theme
+// Pages
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
+import Dashboard from "./components/dashboard/Dashboard";
+import TasksPage from "./pages/TasksPage";
+import TaskDetailPage from "./pages/TaskDetailPage";
+import TaskCreatePage from "./pages/TaskCreatePage";
+import TaskEditPage from "./pages/TaskEditPage";
+
 const theme = createTheme({
   palette: {
+    mode: "light",
     primary: {
-      main: '#1976d2',
+      main: "#1976d2",
     },
     secondary: {
-      main: '#dc004e',
+      main: "#dc004e",
     },
   },
 });
@@ -25,29 +42,67 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          {/* Protected routes */}
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Redirect root to dashboard */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
-          {/* Catch all other routes and redirect to dashboard */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </Router>
+      <AuthProvider>
+        <TaskProvider>
+          <ProjectProvider>
+            <Router>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<Navigate to="/dashboard" replace />} />
+
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/tasks"
+                    element={
+                      <ProtectedRoute>
+                        <TasksPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/tasks/create"
+                    element={
+                      <ProtectedRoute>
+                        <TaskCreatePage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/tasks/edit/:id"
+                    element={
+                      <ProtectedRoute>
+                        <TaskEditPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/tasks/:id"
+                    element={
+                      <ProtectedRoute>
+                        <TaskDetailPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Route>
+              </Routes>
+            </Router>
+          </ProjectProvider>
+        </TaskProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
