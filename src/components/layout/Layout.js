@@ -19,6 +19,7 @@ const Layout = () => {
             <>
               <Button color="inherit" component={Link} to="/dashboard">Dashboard</Button>
               <Button color="inherit" component={Link} to="/tasks">Tasks</Button>
+              <Button color="inherit" component={Link} to="/projects">Projects</Button>
               <Button color="inherit" onClick={logout}>Logout</Button>
             </>
           ) : (
