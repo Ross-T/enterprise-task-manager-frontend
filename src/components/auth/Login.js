@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/authContext';
+import { Link as MuiLink } from '@mui/material';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Container, 
   Box, 
-  Typography, 
   TextField, 
   Button, 
-  Paper, 
+  Typography, 
+  Paper,
+  Avatar,
   CircularProgress,
-  Alert,
-  Link as MuiLink
+  Alert
 } from '@mui/material';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/authContext';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
 const Login = () => {
   const { login, error, loading, clearError } = useAuth();
@@ -87,70 +89,72 @@ const Login = () => {
           alignItems: 'center',
         }}
       >
-        <Paper
-          elevation={3}
-          sx={{
-            padding: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            width: '100%'
-          }}
-        >
-          <Typography component="h1" variant="h5">
-            Sign In
-          </Typography>
-          
-          {error && (
-            <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-          
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={formData.email}
-              onChange={handleChange}
-              error={!!formErrors.email}
-              helperText={formErrors.email}
-              disabled={loading}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={formData.password}
-              onChange={handleChange}
-              error={!!formErrors.password}
-              helperText={formErrors.password}
-              disabled={loading}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Sign In'}
-            </Button>
+        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Sign In
+            </Typography>
+            
+            {error && (
+              <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
+                {error}
+              </Alert>
+            )}
+            
+            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                autoFocus
+                value={formData.email}
+                onChange={handleChange}
+                error={!!formErrors.email}
+                helperText={formErrors.email}
+                disabled={loading}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                value={formData.password}
+                onChange={handleChange}
+                error={!!formErrors.password}
+                helperText={formErrors.password}
+                disabled={loading}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                disabled={loading}
+              >
+                {loading ? <CircularProgress size={24} /> : 'Sign In'}
+              </Button>
             <Box display="flex" justifyContent="center">
-              <MuiLink component={Link} to="/register" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </MuiLink>
+                <MuiLink component={Link} to="/register" variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </MuiLink>
+              </Box>
             </Box>
           </Box>
         </Paper>

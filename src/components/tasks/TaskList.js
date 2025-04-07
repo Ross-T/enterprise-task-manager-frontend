@@ -22,10 +22,11 @@ import TaskStatusChip from "./TaskStatusChip";
 import TaskPriorityChip from "./TaskPriorityChip";
 import DeleteConfirmationDialog from "../common/DeleteConfirmationDialog";
 
-const TaskList = () => {
+const TaskList = ({ projectId }) => {
   const {
     state: { tasks, loading, error },
     fetchTasks,
+    fetchTasksByProject,
     deleteTask,
     clearError,
   } = useContext(TaskContext);
@@ -35,8 +36,14 @@ const TaskList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    // If projectId is provided fetch tasks for that project, otherwise fetch all tasks
+    if (projectId) {
+      fetchTasksByProject(projectId);
+    } else {
+      fetchTasks();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId]);
 
   useEffect(() => {
     // Auto-dismiss errors after 5 seconds
@@ -44,7 +51,8 @@ const TaskList = () => {
       const timer = setTimeout(() => clearError(), 5000);
       return () => clearTimeout(timer);
     }
-  }, [error, clearError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
 
   const handleEditClick = (taskId) => {
     navigate(`/tasks/edit/${taskId}`);
@@ -86,25 +94,27 @@ const TaskList = () => {
 
   return (
     <Box sx={{ mt: 3, mb: 3 }}>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
-      >
-        <Typography variant="h5" component="h1" gutterBottom>
-          Tasks
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          component={Link}
-          to="/tasks/create"
+      {!projectId && (
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2}
         >
-          Create Task
-        </Button>
-      </Box>
+          <Typography variant="h5" component="h1" gutterBottom>
+            Tasks
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            component={Link}
+            to="/tasks/create"
+          >
+            Create Task
+          </Button>
+        </Box>
+      )}
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -115,7 +125,9 @@ const TaskList = () => {
       {tasks.length === 0 ? (
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <Typography variant="body1">
-            No tasks found. Create a new task to get started!
+            {projectId 
+              ? "No tasks found for this project. Add a task to get started!"
+              : "No tasks found. Create a new task to get started!"}
           </Typography>
         </Paper>
       ) : (
@@ -184,7 +196,7 @@ const TaskList = () => {
                         >
                           <TaskStatusChip status={task.status} />
                           <TaskPriorityChip priority={task.priority} />
-                          {task.projectName && (
+                          {task.projectName && !projectId && (
                             <Chip
                               label={task.projectName}
                               size="small"

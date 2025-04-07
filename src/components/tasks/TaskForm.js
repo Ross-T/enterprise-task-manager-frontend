@@ -20,6 +20,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TaskContext } from '../../context/taskContext';
+import enGB from 'date-fns/locale/en-GB';
 
 const TASK_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH'];
 const TASK_STATUSES = ['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE'];
@@ -63,6 +64,7 @@ const TaskForm = () => {
   
     // Clear task data when component unmounts
     return () => clearCurrentTask();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditMode, id]);
 
   useEffect(() => {
@@ -124,15 +126,21 @@ const TaskForm = () => {
       const taskData = {
         ...formData,
         dueDate: formData.dueDate ? formData.dueDate.toISOString() : null,
-        // Convert empty string to null for projectId
         projectId: formData.projectId || null
       };
 
       if (isEditMode) {
         await updateTask(id, taskData);
+        // Refresh project data if task has a project
+        if (taskData.projectId) {
+          fetchProjects();
+        }
         navigate(`/tasks/${id}`);
       } else {
         const result = await createTask(taskData);
+        if (taskData.projectId) {
+          fetchProjects();
+        }
         navigate(`/tasks/${result.id}`);
       }
     } catch (err) {
@@ -240,11 +248,12 @@ const TaskForm = () => {
             )}
 
             <Grid item xs={12} sm={isEditMode ? 6 : 6}>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enGB}>
                 <DateTimePicker
                   label="Due Date"
                   value={formData.dueDate}
                   onChange={handleDateChange}
+                  inputFormat="dd/MM/yyyy HH:mm"
                   renderInput={(params) => (
                     <TextField {...params} fullWidth disabled={loading} />
                   )}

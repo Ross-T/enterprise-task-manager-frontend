@@ -9,7 +9,6 @@ import {
   CircularProgress,
   Alert,
   Divider,
-  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -21,7 +20,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { ProjectContext } from '../../context/projectContext';
 import { TaskContext } from '../../context/taskContext';
 import TaskList from '../tasks/TaskList';
-import format from 'date-fns/format';
+import { format } from 'date-fns';
 
 const ProjectDetail = () => {
   const { id } = useParams();
@@ -89,7 +88,7 @@ const ProjectDetail = () => {
             
             <Box display="flex" gap={2} mt={1}>
               <Typography variant="body2" color="text.secondary">
-                Created: {project.createdAt ? format(new Date(project.createdAt), 'PPP') : 'Not specified'}
+                Created: {project.createdAt ? format(new Date(project.createdAt), 'dd MMM yyyy') : 'Not specified'}
               </Typography>
             </Box>
           </Box>
@@ -151,7 +150,8 @@ const ProjectDetail = () => {
         <DialogTitle>Delete Project</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this project? This will also delete all tasks associated with this project and cannot be undone.
+            Are you sure you want to delete project "{project.name}"? 
+            This will also delete all tasks associated with this project and cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

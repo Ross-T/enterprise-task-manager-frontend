@@ -21,19 +21,19 @@ import {
   Button,
   TablePagination
 } from '@mui/material';
+import { ProjectContext } from '../../context/projectContext';
 import { Link } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { ProjectContext } from '../../context/projectContext';
-import format from 'date-fns/format';
+import { format } from 'date-fns';
 
 const ProjectList = () => {
   const { state: { projects, loading, error }, fetchProjects, deleteProject } = useContext(ProjectContext);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchProjects(page, rowsPerPage);
@@ -108,12 +108,12 @@ const ProjectList = () => {
                   {project.name}
                 </TableCell>
                 <TableCell>
-                  {project.description.length > 100
+                  {project.description?.length > 100
                     ? `${project.description.substring(0, 100)}...`
                     : project.description}
                 </TableCell>
                 <TableCell>
-                  {project.createdAt ? format(new Date(project.createdAt), 'PP') : ''}
+                  {project.createdAt ? format(new Date(project.createdAt), 'dd/MM/yyyy') : ''}
                 </TableCell>
                 <TableCell>
                   <Chip 
