@@ -36,8 +36,11 @@ const TaskDetail = () => {
 
   useEffect(() => {
     fetchTaskById(id);
-
-    return () => clearError();
+    
+    // Clear error when component unmounts
+    return () => {
+      if (clearError) clearError();
+    };
   }, [id]);
 
   const handleEditClick = () => {
@@ -51,11 +54,10 @@ const TaskDetail = () => {
   const handleDeleteConfirm = async () => {
     try {
       await deleteTask(id);
-      setDeleteDialogOpen(false);
-      navigate("/tasks");
+      navigate('/tasks');
     } catch (err) {
-      setDeleteDialogOpen(false);
       console.error("Delete failed:", err);
+      setDeleteDialogOpen(false);
     }
   };
 
@@ -65,12 +67,7 @@ const TaskDetail = () => {
 
   if (loading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="70vh"
-      >
+      <Box display="flex" justifyContent="center" my={3}>
         <CircularProgress />
       </Box>
     );
@@ -78,41 +75,22 @@ const TaskDetail = () => {
 
   if (error) {
     return (
-      <Box mt={3}>
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          component={Link}
-          to="/tasks"
-        >
-          Back to Tasks
-        </Button>
-      </Box>
+      <Alert severity="error" sx={{ mt: 3 }}>
+        {error}
+      </Alert>
     );
   }
 
   if (!task) {
     return (
-      <Box mt={3}>
-        <Alert severity="info">Task not found</Alert>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          component={Link}
-          to="/tasks"
-          sx={{ mt: 2 }}
-        >
-          Back to Tasks
-        </Button>
-      </Box>
+      <Alert severity="info" sx={{ mt: 3 }}>
+        Task not found. It may have been deleted.
+      </Alert>
     );
   }
 
   return (
-    <Box mt={3} mb={3}>
+    <Box sx={{ mt: 3, mb: 3 }}>
       <Box display="flex" alignItems="center" mb={2}>
         <Button
           variant="outlined"
@@ -121,55 +99,60 @@ const TaskDetail = () => {
           to="/tasks"
           sx={{ mr: 2 }}
         >
-          Back
+          Back to Tasks
         </Button>
-
+        
         <Typography variant="h5" component="h1" sx={{ flexGrow: 1 }}>
           Task Details
         </Typography>
-
+        
         <Box>
-          <IconButton
-            color="primary"
-            aria-label="edit task"
+          <Button
+            startIcon={<EditIcon />}
+            variant="outlined"
             onClick={handleEditClick}
             sx={{ mr: 1 }}
           >
-            <EditIcon />
-          </IconButton>
-
-          <IconButton
+            Edit
+          </Button>
+          <Button
+            startIcon={<DeleteIcon />}
+            variant="outlined"
             color="error"
-            aria-label="delete task"
             onClick={handleDeleteClick}
           >
-            <DeleteIcon />
-          </IconButton>
+            Delete
+          </Button>
         </Box>
       </Box>
-
+      
       <Paper sx={{ p: 3 }}>
         <Box mb={3}>
           <Typography variant="h4" gutterBottom>
             {task.title}
           </Typography>
-          <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
+          
+          <Box display="flex" flexWrap="wrap" gap={1} mb={1}>
             <TaskStatusChip status={task.status} />
             <TaskPriorityChip priority={task.priority} />
-            {task.projectId && (
-              <Chip
-                label={task.projectName}
-                variant="outlined"
-                component={Link}
-                to={`/projects/${task.projectId}`}
-                clickable
-              />
-            )}
           </Box>
+          
+          {task.projectName && (
+            <Chip
+              label={task.projectName}
+              color="primary"
+              variant="outlined"
+              size="small"
+              component={Link}
+              to={`/projects/${task.projectId}`}
+              sx={{ textDecoration: 'none' }}
+              clickable
+            />
+          )}
         </Box>
-
-        <Divider sx={{ my: 2 }} />
-
+        
+        <Divider sx={{ my: 3 }} />
+        
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Typography variant="h6" gutterBottom>
@@ -186,7 +169,7 @@ const TaskDetail = () => {
             </Typography>
             <Typography variant="body1">
               {task.createdAt
-                ? format(new Date(task.createdAt), "PPP p")
+                ? format(new Date(task.createdAt), "dd MMM yyyy HH:mm")
                 : "Not specified"}
             </Typography>
           </Grid>
@@ -197,7 +180,7 @@ const TaskDetail = () => {
             </Typography>
             <Typography variant="body1">
               {task.dueDate
-                ? format(new Date(task.dueDate), "PPP p")
+                ? format(new Date(task.dueDate), "dd MMM yyyy HH:mm")
                 : "Not specified"}
             </Typography>
           </Grid>

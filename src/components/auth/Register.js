@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import {
-  Container,
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Paper,
-  CircularProgress,
-  Alert,
-  Link as MuiLink
-} from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
+import { Link as MuiLink } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
+import { 
+  Container, 
+  Box, 
+  TextField, 
+  Button, 
+  Typography, 
+  Paper,
+  Avatar,
+  Grid,
+  CircularProgress,
+  Alert
+} from '@mui/material';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 const Register = () => {
   const { register, error, loading, clearError } = useAuth();
@@ -91,7 +94,7 @@ const Register = () => {
       // Redirect to login after successful registration
       setTimeout(() => {
         navigate('/login');
-      }, 2000);
+      }, 3000);
     } catch (err) {
       console.error('Registration error:', err);
     }
@@ -107,104 +110,114 @@ const Register = () => {
           alignItems: 'center',
         }}
       >
-        <Paper
-          elevation={3}
-          sx={{
-            padding: 4,
-            display: 'flex',
-            flexDirection: 'column',
+        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
             alignItems: 'center',
             width: '100%'
-          }}
-        >
-          <Typography component="h1" variant="h5">
-            Create an Account
-          </Typography>
-          
-          {error && (
-            <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-          
-          {success && (
-            <Alert severity="success" sx={{ width: '100%', mt: 2 }}>
-              Registration successful! Redirecting to login...
-            </Alert>
-          )}
-          
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label="Username"
-              name="username"
-              autoComplete="username"
-              autoFocus
-              value={formData.username}
-              onChange={handleChange}
-              error={!!formErrors.username}
-              helperText={formErrors.username}
-              disabled={loading || success}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-              error={!!formErrors.email}
-              helperText={formErrors.email}
-              disabled={loading || success}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="new-password"
-              value={formData.password}
-              onChange={handleChange}
-              error={!!formErrors.password}
-              helperText={formErrors.password}
-              disabled={loading || success}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="confirmPassword"
-              label="Confirm Password"
-              type="password"
-              id="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              error={!!formErrors.confirmPassword}
-              helperText={formErrors.confirmPassword}
-              disabled={loading || success}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading || success}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Sign Up'}
-            </Button>
-            <Box display="flex" justifyContent="center">
-              <MuiLink component={Link} to="/login" variant="body2">
-                {"Already have an account? Sign In"}
-              </MuiLink>
+            }}
+          >
+            <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+              <PersonAddIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Sign Up
+            </Typography>
+            
+            {error && (
+              <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
+                {error}
+              </Alert>
+            )}
+            
+            {success && (
+              <Alert severity="success" sx={{ mt: 2, width: '100%' }}>
+                Registration successful! Redirecting to login...
+              </Alert>
+            )}
+            
+            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3, width: '100%' }}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="username"
+                    label="Username"
+                    name="username"
+                    autoComplete="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    error={!!formErrors.username}
+                    helperText={formErrors.username}
+                    disabled={loading || success}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    autoComplete="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    error={!!formErrors.email}
+                    helperText={formErrors.email}
+                    disabled={loading || success}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    type="password"
+                    id="password"
+                    autoComplete="new-password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    error={!!formErrors.password}
+                    helperText={formErrors.password}
+                    disabled={loading || success}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    name="confirmPassword"
+                    label="Confirm Password"
+                    type="password"
+                    id="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    error={!!formErrors.confirmPassword}
+                    helperText={formErrors.confirmPassword}
+                    disabled={loading || success}
+                  />
+                </Grid>
+              </Grid>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                disabled={loading || success}
+              >
+                {loading ? <CircularProgress size={24} /> : 'Sign Up'}
+              </Button>
+              <Grid container justifyContent="flex-end">
+                <Grid item>
+                  <MuiLink component={Link} to="/login" variant="body2">
+                    Already have an account? Sign in
+                  </MuiLink>
+                </Grid>
+              </Grid>
             </Box>
           </Box>
         </Paper>

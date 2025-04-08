@@ -25,6 +25,10 @@ import TasksPage from "./pages/TasksPage";
 import TaskDetailPage from "./pages/TaskDetailPage";
 import TaskCreatePage from "./pages/TaskCreatePage";
 import TaskEditPage from "./pages/TaskEditPage";
+import ProjectsPage from "./pages/ProjectsPage";
+import ProjectDetailPage from "./pages/ProjectDetailPage";
+import ProjectCreatePage from "./pages/ProjectCreatePage";
+import ProjectEditPage from "./pages/ProjectEditPage";
 
 const theme = createTheme({
   palette: {
@@ -94,6 +98,42 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <TaskDetailPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/projects"
+                    element={
+                      <ProtectedRoute>
+                        <ProjectsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/projects/create"
+                    element={
+                      <ProtectedRoute>
+                        <ProjectCreatePage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/projects/edit/:id"
+                    element={
+                      <ProtectedRoute>
+                        <ProjectEditPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/projects/:id"
+                    element={
+                      <ProtectedRoute>
+                        <ProjectDetailPage />
                       </ProtectedRoute>
                     }
                   />

@@ -9,7 +9,7 @@ This repository contains the frontend application for the Enterprise Task Manage
 The Enterprise Task Manager frontend aims to provide an intuitive, responsive interface for task and project management with the following objectives:
 
 1. Implement a secure authentication system with JWT tokens
-2. Create an intuitive dashboard for task and project visualization
+2. Create an intuitive dashboard for task and project visualisation
 3. Provide responsive design for mobile and desktop use
 4. Demonstrate enterprise-level frontend architecture patterns
 
@@ -17,7 +17,7 @@ The Enterprise Task Manager frontend aims to provide an intuitive, responsive in
 
 - **User Authentication**: Secure login/signup with JWT-based authentication
 - **Task Management**: Create, view, update, and delete tasks with various attributes
-- **Project Management**: Organize tasks within projects
+- **Project Management**: Organise tasks within projects
 - **Dashboard**: Visual overview of tasks and projects
 - **Responsive Design**: Works seamlessly across desktop and mobile devices
 
@@ -25,17 +25,17 @@ The Enterprise Task Manager frontend aims to provide an intuitive, responsive in
 
 ### Scalability
 - Component-based architecture allows for easy feature addition
-- Code splitting for optimized bundle sizes
+- Code splitting for optimised bundle sizes
 - Environment-based configuration for different deployment environments
 
 ### Security
 - Secure API communication with JWT authentication
-- Input validation and sanitization
+- Input validation and sanitisation
 - HTTPS enforcement in production
 - Environment variable management for sensitive information
 
 ### Performance
-- Optimized React component rendering
+- Optimised React component rendering
 - Material-UI with theming for consistent design
 - Lazy loading of components where appropriate
 
@@ -107,7 +107,7 @@ API requests are managed through service modules in the `src/api` directory, wit
 
 `npm run build`
 
-This creates an optimized production build in the `build` folder.
+This creates an optimised production build in the `build` folder.
 
 ### Deployment Options
 
@@ -134,7 +134,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Created as part of enterprise software engineering coursework
 - UI design inspired by industry-standard task management solutions
-
 
 ## Quality Assurance
 
@@ -166,7 +165,7 @@ The application follows WCAG 2.1 AA standards:
 - Semantic HTML structure
 - Keyboard navigation support
 - Screen reader compatibility
-- Sufficient color contrast
+- Sufficient colour contrast
 - Focus management
 
 ## Development Workflow
