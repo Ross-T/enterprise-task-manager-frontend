@@ -125,6 +125,7 @@ const Dashboard = () => {
                         button
                         component={Link}
                         to={`/tasks/${task.id}`}
+                        state={{ returnTo: "/dashboard" }}
                       >
                         <ListItemText 
                           primary={task.title}
@@ -176,6 +177,7 @@ const Dashboard = () => {
                         button
                         component={Link}
                         to={`/tasks/${task.id}`}
+                        state={{ returnTo: "/dashboard" }}
                       >
                         <ListItemText 
                           primary={task.title}

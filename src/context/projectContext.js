@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useContext } from 'react';
+import React, { createContext, useReducer, useContext, useCallback } from 'react';
 import * as projectService from '../api/projectService';
 
 // Create context
@@ -92,7 +92,7 @@ export const ProjectProvider = ({ children }) => {
   const [state, dispatch] = useReducer(projectReducer, initialState);
 
   // Fetch all projects
-  const fetchProjects = async (page = 0, size = 10) => {
+  const fetchProjects = useCallback(async (page = 0, size = 10) => {
     dispatch({ type: 'FETCH_PROJECTS_REQUEST' });
     try {
       const response = await projectService.getProjects(page, size);
@@ -105,10 +105,10 @@ export const ProjectProvider = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
   // Fetch a single project by ID
-  const fetchProjectById = async (id) => {
+  const fetchProjectById = useCallback(async (id) => {
     dispatch({ type: 'FETCH_PROJECT_REQUEST' });
     try {
       const response = await projectService.getProjectById(id);
@@ -121,10 +121,10 @@ export const ProjectProvider = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
   // Create a new project
-  const createProject = async (projectData) => {
+  const createProject = useCallback(async (projectData) => {
     dispatch({ type: 'FETCH_PROJECT_REQUEST' });
     try {
       const response = await projectService.createProject(projectData);
@@ -137,10 +137,10 @@ export const ProjectProvider = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
   // Update an existing project
-  const updateProject = async (id, projectData) => {
+  const updateProject = useCallback(async (id, projectData) => {
     dispatch({ type: 'FETCH_PROJECT_REQUEST' });
     try {
       const response = await projectService.updateProject(id, projectData);
@@ -153,10 +153,10 @@ export const ProjectProvider = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
   // Delete a project
-  const deleteProject = async (id) => {
+  const deleteProject = useCallback(async (id) => {
     dispatch({ type: 'FETCH_PROJECT_REQUEST' });
     try {
       await projectService.deleteProject(id);
@@ -168,17 +168,17 @@ export const ProjectProvider = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
   // Clear any error messages
-  const clearError = () => {
+  const clearError = useCallback(() => {
     dispatch({ type: 'CLEAR_ERROR' });
-  };
+  }, []);
 
   // Clear current project from state
-  const clearCurrentProject = () => {
+  const clearCurrentProject = useCallback(() => {
     dispatch({ type: 'CLEAR_CURRENT_PROJECT' });
-  };
+  }, []);
 
   return (
     <ProjectContext.Provider
