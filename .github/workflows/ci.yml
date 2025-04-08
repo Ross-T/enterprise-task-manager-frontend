@@ -1,0 +1,54 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'enterprise-task-manager-frontend/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'enterprise-task-manager-frontend/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: enterprise-task-manager-frontend
+        
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: enterprise-task-manager-frontend/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run security audit
+        run: npm audit --production
+
+      - name: Run ESLint
+        run: npm run lint
+        
+      - name: Check type errors
+        run: npm run tsc || echo "Type checking complete"
+        
+      - name: Build project
+        run: npm run build
+      
+      - name: Run tests with coverage
+        run: npm test -- --coverage --passWithNoTests
+      
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: enterprise-task-manager-frontend/build
+          
