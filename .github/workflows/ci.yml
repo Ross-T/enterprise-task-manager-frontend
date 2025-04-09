@@ -1,4 +1,4 @@
-name: Frontend CI
+name: CI Pipeline
 
 on:
   push:
@@ -9,10 +9,6 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    
-    defaults:
-      run:
-        working-directory: enterprise-task-manager-frontend
         
     steps:
       - uses: actions/checkout@v3
@@ -22,7 +18,7 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
-          cache-dependency-path: enterprise-task-manager-frontend/package-lock.json
+          cache-dependency-path: package-lock.json
       
       - name: Install dependencies
         run: npm ci
@@ -46,5 +42,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build
-          path: enterprise-task-manager-frontend/build
-          
+          path: build
