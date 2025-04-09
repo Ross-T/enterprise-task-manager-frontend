@@ -13,8 +13,24 @@ import {
   Grid,
   CircularProgress,
   Alert,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+
+// Password strength requirements
+const PASSWORD_REQUIREMENTS = [
+  { id: 'length', text: 'At least 8 characters', regex: /.{8,}/ },
+  { id: 'lowercase', text: 'At least one lowercase letter', regex: /[a-z]+/ },
+  { id: 'uppercase', text: 'At least one uppercase letter', regex: /[A-Z]+/ },
+  { id: 'number', text: 'At least one number', regex: /[0-9]+/ },
+  { id: 'special', text: 'At least one special character', regex: /[^A-Za-z0-9]+/ },
+];
 
 const Register = () => {
   const { register, error, loading, clearError } = useAuth();
@@ -34,10 +50,68 @@ const Register = () => {
   );
   const [emailVerificationRequired, setEmailVerificationRequired] =
     useState(false);
+  
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    color: "error",
+    label: "Very Weak",
+    requirements: PASSWORD_REQUIREMENTS.reduce((acc, req) => {
+      acc[req.id] = false;
+      return acc;
+    }, {})
+  });
+
+  const calculatePasswordStrength = (password) => {
+    if (!password) {
+      return {
+        score: 0,
+        color: "error",
+        label: "Very Weak",
+        requirements: PASSWORD_REQUIREMENTS.reduce((acc, req) => {
+          acc[req.id] = false;
+          return acc;
+        }, {})
+      };
+    }
+
+    const requirements = PASSWORD_REQUIREMENTS.reduce((acc, requirement) => {
+      acc[requirement.id] = requirement.regex.test(password);
+      return acc;
+    }, {});
+    
+    // Calculate score based on met requirements (0-100)
+    const metRequirements = Object.values(requirements).filter(Boolean).length;
+    const score = (metRequirements / PASSWORD_REQUIREMENTS.length) * 100;
+    
+    // Determine color and label based on score
+    let color, label;
+    if (score < 20) {
+      color = "error";
+      label = "Very Weak";
+    } else if (score < 40) {
+      color = "error";
+      label = "Weak";
+    } else if (score < 60) {
+      color = "warning";
+      label = "Fair";
+    } else if (score < 80) {
+      color = "info";
+      label = "Good";
+    } else {
+      color = "success";
+      label = "Strong";
+    }
+    
+    return { score, color, label, requirements };
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+
+    if (name === 'password') {
+      setPasswordStrength(calculatePasswordStrength(value));
+    }
 
     // Clear field error when user starts typing
     if (formErrors[name]) {
@@ -66,8 +140,13 @@ const Register = () => {
 
     if (!formData.password) {
       errors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
+    } else if (passwordStrength.score < 60) {
+      // Require at least a "Fair" password strength
+      const missingRequirements = PASSWORD_REQUIREMENTS.filter(
+        req => !passwordStrength.requirements[req.id]
+      ).map(req => req.text).join(', ');
+      
+      errors.password = `Password is too weak. Please ensure: ${missingRequirements}`;
     }
 
     if (!formData.confirmPassword) {
@@ -203,6 +282,43 @@ const Register = () => {
                     helperText={formErrors.password}
                     disabled={loading || success}
                   />
+                  {formData.password && (
+                    <Box sx={{ mt: 1, mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                        <Typography variant="body2">Password Strength:</Typography>
+                        <Typography variant="body2" color={`${passwordStrength.color}.main`}>
+                          {passwordStrength.label}
+                        </Typography>
+                      </Box>
+                      <LinearProgress 
+                        variant="determinate" 
+                        value={passwordStrength.score} 
+                        color={passwordStrength.color}
+                        sx={{ height: 8, borderRadius: 4 }}
+                      />
+
+                      <Typography variant="body2" sx={{ mt: 1, mb: 0.5 }}>
+                        Password requirements:
+                      </Typography>
+                      <List dense disablePadding>
+                        {PASSWORD_REQUIREMENTS.map((requirement) => (
+                          <ListItem key={requirement.id} disableGutters dense>
+                            <ListItemIcon sx={{ minWidth: 36 }}>
+                              {passwordStrength.requirements[requirement.id] ? (
+                                <CheckIcon fontSize="small" color="success" />
+                              ) : (
+                                <CloseIcon fontSize="small" color="error" />
+                              )}
+                            </ListItemIcon>
+                            <ListItemText 
+                              primary={requirement.text} 
+                              primaryTypographyProps={{ variant: 'body2' }}
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
+                  )}
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
@@ -225,7 +341,7 @@ const Register = () => {
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
-                disabled={loading || success}
+                disabled={loading || success || passwordStrength.score < 60}
               >
                 {loading ? <CircularProgress size={24} /> : "Sign Up"}
               </Button>
