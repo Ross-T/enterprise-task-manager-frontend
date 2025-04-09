@@ -29,7 +29,7 @@ const Dashboard = () => {
   useEffect(() => {
     fetchTasks();
     fetchProjects();
-  }, []);
+  }, [fetchTasks, fetchProjects]);
   
   // Get counts for dashboard stats
   const taskCount = tasks?.length || 0;
