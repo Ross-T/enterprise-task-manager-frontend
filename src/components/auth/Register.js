@@ -20,17 +20,60 @@ import {
   ListItemText,
 } from "@mui/material";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 
-// Password strength requirements
+// Password strength core requirements
 const PASSWORD_REQUIREMENTS = [
-  { id: 'length', text: 'At least 8 characters', regex: /.{8,}/ },
-  { id: 'lowercase', text: 'At least one lowercase letter', regex: /[a-z]+/ },
-  { id: 'uppercase', text: 'At least one uppercase letter', regex: /[A-Z]+/ },
-  { id: 'number', text: 'At least one number', regex: /[0-9]+/ },
-  { id: 'special', text: 'At least one special character', regex: /[^A-Za-z0-9]+/ },
+  { id: "length", text: "At least 8 characters", regex: /.{8,}/ },
+  { id: "lowercase", text: "At least one lowercase letter", regex: /[a-z]+/ },
+  { id: "uppercase", text: "At least one uppercase letter", regex: /[A-Z]+/ },
+  { id: "number", text: "At least one number", regex: /[0-9]+/ },
+  {
+    id: "special",
+    text: "At least one special character",
+    regex: /[^A-Za-z0-9]+/,
+  },
 ];
+
+// Factors affecting password entropy
+const calculateEntropyScore = (password) => {
+  let score = 0;
+
+  // length
+  if (password.length > 9) {
+    score += Math.min((password.length - 8) * 5, 30);
+  }
+
+  // multiple numbers
+  const numNumbers = (password.match(/[0-9]/g) || []).length;
+  if (numNumbers > 2) {
+    score += Math.min(numNumbers * 2, 10);
+  }
+
+  // multiple special characters
+  const numSpecial = (password.match(/[^A-Za-z0-9]/g) || []).length;
+  if (numSpecial > 1) {
+    score += Math.min(numSpecial * 5, 20);
+  }
+
+  // penalise for repeating characters
+  const repeats = password.match(/(.)\1{2,}/g); // 3+ repeated chars
+  if (repeats) {
+    score -= repeats.length * 5;
+  }
+
+  // penalise for sequential characters
+  if (
+    /(?:abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz|012|123|234|345|456|567|678|789)/i.test(
+      password
+    )
+  ) {
+    score -= 10;
+  }
+
+  return score;
+};
 
 const Register = () => {
   const { register, error, loading, clearError } = useAuth();
@@ -50,7 +93,7 @@ const Register = () => {
   );
   const [emailVerificationRequired, setEmailVerificationRequired] =
     useState(false);
-  
+
   const [passwordStrength, setPasswordStrength] = useState({
     score: 0,
     color: "error",
@@ -58,7 +101,7 @@ const Register = () => {
     requirements: PASSWORD_REQUIREMENTS.reduce((acc, req) => {
       acc[req.id] = false;
       return acc;
-    }, {})
+    }, {}),
   });
 
   const calculatePasswordStrength = (password) => {
@@ -70,7 +113,7 @@ const Register = () => {
         requirements: PASSWORD_REQUIREMENTS.reduce((acc, req) => {
           acc[req.id] = false;
           return acc;
-        }, {})
+        }, {}),
       };
     }
 
@@ -78,12 +121,17 @@ const Register = () => {
       acc[requirement.id] = requirement.regex.test(password);
       return acc;
     }, {});
-    
-    // Calculate score based on met requirements (0-100)
+
+    // Count met requirements
     const metRequirements = Object.values(requirements).filter(Boolean).length;
-    const score = (metRequirements / PASSWORD_REQUIREMENTS.length) * 100;
-    
-    // Determine color and label based on score
+
+    // Calculate score based on met requirements (0-75)
+    let baseScore = (metRequirements / PASSWORD_REQUIREMENTS.length) * 75;
+
+    // Add points for additional entropy (0-25 points)
+    const entropyBonus = calculateEntropyScore(password);
+    let score = Math.min(baseScore + entropyBonus, 100);
+
     let color, label;
     if (score < 20) {
       color = "error";
@@ -94,14 +142,14 @@ const Register = () => {
     } else if (score < 60) {
       color = "warning";
       label = "Fair";
-    } else if (score < 80) {
+    } else if (score < 85) {
       color = "info";
       label = "Good";
     } else {
       color = "success";
       label = "Strong";
     }
-    
+
     return { score, color, label, requirements };
   };
 
@@ -109,7 +157,7 @@ const Register = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    if (name === 'password') {
+    if (name === "password") {
       setPasswordStrength(calculatePasswordStrength(value));
     }
 
@@ -140,13 +188,24 @@ const Register = () => {
 
     if (!formData.password) {
       errors.password = "Password is required";
-    } else if (passwordStrength.score < 60) {
-      // Require at least a "Fair" password strength
-      const missingRequirements = PASSWORD_REQUIREMENTS.filter(
-        req => !passwordStrength.requirements[req.id]
-      ).map(req => req.text).join(', ');
-      
-      errors.password = `Password is too weak. Please ensure: ${missingRequirements}`;
+    } else {
+      // Check if all requirements are met
+      const allRequirementsMet = Object.values(
+        passwordStrength.requirements
+      ).every(Boolean);
+
+      if (!allRequirementsMet) {
+        const missingRequirements = PASSWORD_REQUIREMENTS.filter(
+          (req) => !passwordStrength.requirements[req.id]
+        )
+          .map((req) => req.text)
+          .join(", ");
+
+        errors.password = `Password does not meet all requirements. Missing: ${missingRequirements}`;
+      } else if (passwordStrength.score < 60) {
+        errors.password =
+          "Password is too weak. Please use a stronger password.";
+      }
     }
 
     if (!formData.confirmPassword) {
@@ -160,26 +219,26 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
     }
-  
+
     try {
       const { confirmPassword, ...registrationData } = formData;
       const response = await register(registrationData);
-  
+
       console.log("Registration response:", response);
+
       setSuccess(true);
       setEmailVerificationRequired(true);
       setSuccessMessage(
         "Registration successful! Please check your email to confirm your account before logging in."
       );
-  
       sessionStorage.setItem("needsEmailVerification", "true");
-  
+
       setTimeout(() => {
         navigate("/login");
       }, 5000);
@@ -284,15 +343,27 @@ const Register = () => {
                   />
                   {formData.password && (
                     <Box sx={{ mt: 1, mb: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-                        <Typography variant="body2">Password Strength:</Typography>
-                        <Typography variant="body2" color={`${passwordStrength.color}.main`}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          mb: 0.5,
+                        }}
+                      >
+                        <Typography variant="body2">
+                          Password Strength:
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color={`${passwordStrength.color}.main`}
+                        >
                           {passwordStrength.label}
                         </Typography>
                       </Box>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={passwordStrength.score} 
+                      <LinearProgress
+                        variant="determinate"
+                        value={passwordStrength.score}
                         color={passwordStrength.color}
                         sx={{ height: 8, borderRadius: 4 }}
                       />
@@ -310,9 +381,9 @@ const Register = () => {
                                 <CloseIcon fontSize="small" color="error" />
                               )}
                             </ListItemIcon>
-                            <ListItemText 
-                              primary={requirement.text} 
-                              primaryTypographyProps={{ variant: 'body2' }}
+                            <ListItemText
+                              primary={requirement.text}
+                              primaryTypographyProps={{ variant: "body2" }}
                             />
                           </ListItem>
                         ))}
