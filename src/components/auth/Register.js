@@ -1,144 +1,162 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../context/authContext';
-import { Link as MuiLink } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
-import { 
-  Container, 
-  Box, 
-  TextField, 
-  Button, 
-  Typography, 
+import React, { useState } from "react";
+import { useAuth } from "../../context/authContext";
+import { Link as MuiLink } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Container,
+  Box,
+  TextField,
+  Button,
+  Typography,
   Paper,
   Avatar,
   Grid,
   CircularProgress,
-  Alert
-} from '@mui/material';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
+  Alert,
+} from "@mui/material";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 const Register = () => {
   const { register, error, loading, clearError } = useAuth();
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
-  
+
   const [formErrors, setFormErrors] = useState({});
   const [success, setSuccess] = useState(false);
-  
+  const [successMessage, setSuccessMessage] = useState(
+    "Registration successful! Redirecting to login..."
+  );
+  const [emailVerificationRequired, setEmailVerificationRequired] =
+    useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
+
     // Clear field error when user starts typing
     if (formErrors[name]) {
-      setFormErrors({ ...formErrors, [name]: '' });
+      setFormErrors({ ...formErrors, [name]: "" });
     }
-    
-    // Clear global error
+
     if (error) {
       clearError();
     }
   };
-  
+
   const validateForm = () => {
     const errors = {};
-    
+
     if (!formData.username) {
-      errors.username = 'Username is required';
+      errors.username = "Username is required";
     } else if (formData.username.length < 3) {
-      errors.username = 'Username must be at least 3 characters';
+      errors.username = "Username must be at least 3 characters";
     }
-    
+
     if (!formData.email) {
-      errors.email = 'Email is required';
+      errors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Email address is invalid';
+      errors.email = "Email address is invalid";
     }
-    
+
     if (!formData.password) {
-      errors.password = 'Password is required';
+      errors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
+      errors.password = "Password must be at least 6 characters";
     }
-    
+
     if (!formData.confirmPassword) {
-      errors.confirmPassword = 'Please confirm your password';
+      errors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
+      errors.confirmPassword = "Passwords do not match";
     }
-    
+
     return errors;
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate form
+  
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
     }
-    
+  
     try {
-      // Remove confirmPassword as it's not needed in the API call
       const { confirmPassword, ...registrationData } = formData;
-      await register(registrationData);
+      const response = await register(registrationData);
+  
+      console.log("Registration response:", response);
       setSuccess(true);
-      
-      // Redirect to login after successful registration
+      setEmailVerificationRequired(true);
+      setSuccessMessage(
+        "Registration successful! Please check your email to confirm your account before logging in."
+      );
+  
+      sessionStorage.setItem("needsEmailVerification", "true");
+  
       setTimeout(() => {
-        navigate('/login');
-      }, 3000);
+        navigate("/login");
+      }, 5000);
     } catch (err) {
-      console.error('Registration error:', err);
+      console.error("Registration error:", err);
     }
   };
-  
+
   return (
     <Container component="main" maxWidth="xs">
       <Box
         sx={{
           marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
+        <Paper elevation={3} sx={{ p: 4, width: "100%" }}>
           <Box
             sx={{
-              display: 'flex',
-              flexDirection: 'column',
-            alignItems: 'center',
-            width: '100%'
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
             }}
           >
-            <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+            <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
               <PersonAddIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
               Sign Up
             </Typography>
-            
+
             {error && (
-              <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
+              <Alert severity="error" sx={{ mt: 2, width: "100%" }}>
                 {error}
               </Alert>
             )}
-            
+
             {success && (
-              <Alert severity="success" sx={{ mt: 2, width: '100%' }}>
-                Registration successful! Redirecting to login...
+              <Alert
+                severity={emailVerificationRequired ? "info" : "success"}
+                sx={{ mt: 2, width: "100%" }}
+                icon={emailVerificationRequired ? null : undefined}
+              >
+                {successMessage}
               </Alert>
             )}
-            
-            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3, width: '100%' }}>
+
+            <Box
+              component="form"
+              onSubmit={handleSubmit}
+              noValidate
+              sx={{ mt: 3, width: "100%" }}
+            >
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <TextField
@@ -209,7 +227,7 @@ const Register = () => {
                 sx={{ mt: 3, mb: 2 }}
                 disabled={loading || success}
               >
-                {loading ? <CircularProgress size={24} /> : 'Sign Up'}
+                {loading ? <CircularProgress size={24} /> : "Sign Up"}
               </Button>
               <Grid container justifyContent="flex-end">
                 <Grid item>
