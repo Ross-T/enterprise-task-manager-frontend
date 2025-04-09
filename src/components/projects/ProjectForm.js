@@ -32,7 +32,7 @@ const ProjectForm = () => {
     }
     
     return () => clearCurrentProject();
-  }, [isEditMode, id]);
+  }, [isEditMode, id, clearCurrentProject, fetchProjectById]);
 
   useEffect(() => {
     if (isEditMode && project) {

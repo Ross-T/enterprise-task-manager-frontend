@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useContext } from "react";
+import React, { createContext, useReducer, useContext, useCallback } from "react";
 import * as taskService from "../api/taskService";
 
 // Create context
@@ -103,7 +103,7 @@ export const TaskProvider = ({ children }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
 
   // Actions
-  const fetchTasks = async (page = 0, size = 10) => {
+  const fetchTasks = useCallback(async (page = 0, size = 10) => {
     dispatch({ type: "FETCH_TASKS_REQUEST" });
     try {
       const response = await taskService.getTasks(page, size);
@@ -116,9 +116,9 @@ export const TaskProvider = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
-  const fetchTasksByProject = async (projectId, page = 0, size = 10) => {
+  const fetchTasksByProject = useCallback(async (projectId, page = 0, size = 10) => {
     dispatch({ type: "FETCH_TASKS_REQUEST" });
     try {
       const response = await taskService.getTasksByProject(
@@ -135,9 +135,9 @@ export const TaskProvider = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
-  const fetchTasksByStatus = async (status, page = 0, size = 10) => {
+  const fetchTasksByStatus = useCallback(async (status, page = 0, size = 10) => {
     dispatch({ type: "FETCH_TASKS_REQUEST" });
     try {
       const response = await taskService.getTasksByStatus(status, page, size);
@@ -150,9 +150,9 @@ export const TaskProvider = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
-  const fetchTaskById = async (id) => {
+  const fetchTaskById = useCallback(async (id) => {
     dispatch({ type: "FETCH_TASK_REQUEST" });
     try {
       const response = await taskService.getTaskById(id);
@@ -161,13 +161,13 @@ export const TaskProvider = ({ children }) => {
     } catch (error) {
       dispatch({
         type: "TASK_ERROR",
-        payload: error.response?.data?.message || "Failed to fetch task",
+        payload: error.response?.data?.message || `Failed to fetch task with ID: ${id}`,
       });
       throw error;
     }
-  };
+  }, []);
 
-  const createTask = async (task) => {
+  const createTask = useCallback(async (task) => {
     dispatch({ type: "CREATE_TASK_REQUEST" });
     try {
       const response = await taskService.createTask(task);
@@ -180,9 +180,9 @@ export const TaskProvider = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
-  const updateTask = async (id, task) => {
+  const updateTask = useCallback(async (id, task) => {
     dispatch({ type: "UPDATE_TASK_REQUEST" });
     try {
       const response = await taskService.updateTask(id, task);
@@ -195,9 +195,9 @@ export const TaskProvider = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
-  const deleteTask = async (id) => {
+  const deleteTask = useCallback(async (id) => {
     dispatch({ type: "DELETE_TASK_REQUEST" });
     try {
       await taskService.deleteTask(id);
@@ -209,15 +209,15 @@ export const TaskProvider = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
-  const clearError = () => {
+  const clearError = useCallback(() => {
     dispatch({ type: "CLEAR_TASK_ERROR" });
-  };
+  }, []);
 
-  const clearCurrentTask = () => {
+  const clearCurrentTask = useCallback(() => {
     dispatch({ type: "CLEAR_CURRENT_TASK" });
-  };
+  }, []);
 
   return (
     <TaskContext.Provider

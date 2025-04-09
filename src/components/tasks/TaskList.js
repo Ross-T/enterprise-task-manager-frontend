@@ -22,7 +22,7 @@ import TaskStatusChip from "./TaskStatusChip";
 import TaskPriorityChip from "./TaskPriorityChip";
 import DeleteConfirmationDialog from "../common/DeleteConfirmationDialog";
 
-const TaskList = ({ projectId }) => {
+const TaskList = ({ projectId, returnPath = "/tasks", isDeleting = false }) => {
   const {
     state: { tasks, loading, error },
     fetchTasks,
@@ -33,17 +33,34 @@ const TaskList = ({ projectId }) => {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If projectId is provided fetch tasks for that project, otherwise fetch all tasks
-    if (projectId) {
-      fetchTasksByProject(projectId);
-    } else {
-      fetchTasks();
-    }
+    const loadTasks = async () => {
+      try {
+        // Skip loading if the project is being deleted
+        if (isDeleting) {
+          return;
+        }
+        
+        if (projectId) {
+          await fetchTasksByProject(projectId);
+        } else {
+          await fetchTasks();
+        }
+        setFetchError(null);
+      } catch (err) {
+        if (err.response && err.response.status === 404 && projectId) {
+          setFetchError("Project no longer exists");
+          console.log("Project not found, it may have been deleted");
+        }
+      }
+    };
+    
+    loadTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId]);
+  }, [projectId, isDeleting]);
 
   useEffect(() => {
     // Auto-dismiss errors after 5 seconds
@@ -69,8 +86,8 @@ const TaskList = ({ projectId }) => {
       setDeleteDialogOpen(false);
       setTaskToDelete(null);
     } catch (err) {
-      setDeleteDialogOpen(false);
       console.error("Delete failed:", err);
+      setDeleteDialogOpen(false);
     }
   };
 
@@ -79,13 +96,23 @@ const TaskList = ({ projectId }) => {
     setTaskToDelete(null);
   };
 
+  if (fetchError && projectId) {
+    return (
+      <Paper sx={{ p: 3, textAlign: "center" }}>
+        <Alert severity="info" sx={{ mb: 2 }}>
+          {fetchError}
+        </Alert>
+      </Paper>
+    );
+  }
+
   if (loading && tasks.length === 0) {
     return (
       <Box
         display="flex"
         justifyContent="center"
         alignItems="center"
-        height="70vh"
+        height="100px"
       >
         <CircularProgress />
       </Box>
@@ -94,6 +121,7 @@ const TaskList = ({ projectId }) => {
 
   return (
     <Box sx={{ mt: 3, mb: 3 }}>
+      {/* Only show the header and button if not in a project context */}
       {!projectId && (
         <Box
           display="flex"
@@ -110,6 +138,7 @@ const TaskList = ({ projectId }) => {
             startIcon={<AddIcon />}
             component={Link}
             to="/tasks/create"
+            state={{ returnTo: returnPath }}
           >
             Create Task
           </Button>
@@ -151,6 +180,7 @@ const TaskList = ({ projectId }) => {
                         edge="end"
                         aria-label="delete"
                         onClick={() => handleDeleteClick(task)}
+                        sx={{ ml: 1 }}
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -159,44 +189,39 @@ const TaskList = ({ projectId }) => {
                 >
                   <ListItemText
                     primary={
-                      <Typography
-                        component={Link}
+                      <Link
                         to={`/tasks/${task.id}`}
-                        color="textPrimary"
-                        sx={{
-                          textDecoration: "none",
-                          fontWeight: "medium",
-                          "&:hover": {
-                            textDecoration: "underline",
-                          },
-                        }}
+                        state={{ returnTo: returnPath }}
+                        style={{ textDecoration: "none", color: "inherit" }}
                       >
                         {task.title}
-                      </Typography>
+                      </Link>
                     }
                     secondary={
-                      <React.Fragment>
+                      <Box sx={{ mt: 1 }}>
                         <Typography
-                          sx={{ display: "block" }}
-                          component="span"
                           variant="body2"
-                          color="text.primary"
+                          color="text.secondary"
+                          component="span"
+                          sx={{ display: "block", mb: 1 }}
                         >
-                          {task.description?.length > 100
-                            ? `${task.description.substring(0, 100)}...`
-                            : task.description}
+                          {task.description
+                            ? task.description.length > 100
+                              ? `${task.description.substring(0, 100)}...`
+                              : task.description
+                            : "No description"}
                         </Typography>
                         <Box
                           sx={{
-                            mt: 1,
                             display: "flex",
-                            flexWrap: "wrap",
                             gap: 1,
+                            flexWrap: "wrap",
+                            alignItems: "center",
                           }}
                         >
                           <TaskStatusChip status={task.status} />
                           <TaskPriorityChip priority={task.priority} />
-                          {task.projectName && !projectId && (
+                          {task.projectName && (
                             <Chip
                               label={task.projectName}
                               size="small"
@@ -204,10 +229,11 @@ const TaskList = ({ projectId }) => {
                               component={Link}
                               to={`/projects/${task.projectId}`}
                               clickable
+                              sx={{ maxWidth: 150 }}
                             />
                           )}
                         </Box>
-                      </React.Fragment>
+                      </Box>
                     }
                   />
                 </ListItem>
@@ -220,7 +246,9 @@ const TaskList = ({ projectId }) => {
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
         title="Delete Task"
-        content={`Are you sure you want to delete "${taskToDelete?.title}"? This action cannot be undone.`}
+        content={`Are you sure you want to delete the task "${
+          taskToDelete?.title || ""
+        }"? This action cannot be undone.`}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
       />

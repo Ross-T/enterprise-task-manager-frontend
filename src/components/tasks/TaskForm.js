@@ -1,6 +1,5 @@
-import { ProjectContext } from '../../context/projectContext';  
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -13,13 +12,13 @@ import {
   Paper,
   Grid,
   CircularProgress,
-  Alert,
-  FormHelperText
+  Alert
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TaskContext } from '../../context/taskContext';
+import { ProjectContext } from '../../context/projectContext';
 import enGB from 'date-fns/locale/en-GB';
 
 const TASK_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH'];
@@ -28,7 +27,10 @@ const TASK_STATUSES = ['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE'];
 const TaskForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const isEditMode = Boolean(id);
+  
+  const returnPath = location.state?.returnTo || (isEditMode ? `/tasks/${id}` : '/tasks');
 
   const {
     state: { task, loading, error },
@@ -135,13 +137,14 @@ const TaskForm = () => {
         if (taskData.projectId) {
           fetchProjects();
         }
-        navigate(`/tasks/${id}`);
+        navigate(`/tasks/${id}`, { state: { returnTo: returnPath } });
       } else {
         const result = await createTask(taskData);
+        // Refresh project data if new task has a project
         if (taskData.projectId) {
           fetchProjects();
         }
-        navigate(`/tasks/${result.id}`);
+        navigate(`/tasks/${result.id}`, { state: { returnTo: returnPath } });
       }
     } catch (err) {
       console.error('Form submission error:', err);
@@ -149,11 +152,7 @@ const TaskForm = () => {
   };
 
   const handleCancel = () => {
-    if (isEditMode) {
-      navigate(`/tasks/${id}`);
-    } else {
-      navigate('/tasks');
-    }
+    navigate(returnPath);
   };
 
   return (

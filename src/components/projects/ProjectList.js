@@ -37,7 +37,7 @@ const ProjectList = () => {
 
   useEffect(() => {
     fetchProjects(page, rowsPerPage);
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, fetchProjects]);
 
   const handleDeleteClick = (project) => {
     setProjectToDelete(project);

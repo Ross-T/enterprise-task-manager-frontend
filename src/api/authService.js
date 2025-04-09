@@ -1,7 +1,4 @@
 import api from './axiosConfig';
-import { API_BASE_URL } from './config';
-
-const API_AUTH = `${API_BASE_URL}/auth`;
 
 export const login = async (credentials) => {
   const response = await api.post(`/auth/signin`, credentials);
