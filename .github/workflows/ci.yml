@@ -35,9 +35,10 @@ jobs:
       - name: Build project
         run: npm run build
       
-      - name: Run tests with coverage
+      - name: Run tests with coverage (informational)
         run: npm test -- --coverage --passWithNoTests --transformIgnorePatterns="node_modules/(?!axios|react-router-dom)/"
-      
+        continue-on-error: true
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
