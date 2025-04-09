@@ -16,7 +16,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useAuth } from '../../context/authContext';
 
 const Login = () => {
-  const { login, error: authError, loading, clearError } = useAuth();
+  const { login, error: authError, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
