@@ -113,7 +113,7 @@ export const TaskProvider = ({ children }) => {
     } catch (error) {
       dispatch({
         type: "TASK_ERROR",
-        payload: error.message || "Failed to fetch tasks",
+        payload: error.response?.data?.message || error.message || "Failed to fetch tasks",
       });
       throw error;
     }
