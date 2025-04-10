@@ -1,33 +1,24 @@
-import React, { useEffect, useContext, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Button,
-  CircularProgress,
-  Alert,
-  Divider,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
+import { 
+  Box, Paper, Typography, Divider, Grid, Button, 
+  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
+  CircularProgress, Alert
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
+import { format } from 'date-fns';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+
 import { ProjectContext } from '../../context/projectContext';
 import { TaskContext } from '../../context/taskContext';
 import TaskList from '../tasks/TaskList';
-import { format } from 'date-fns';
 
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
   const { state: { project, loading, error }, fetchProjectById, deleteProject, clearError } = useContext(ProjectContext);
-  const { clearError: clearTaskError } = useContext(TaskContext);
+  const { fetchTasksByProject, clearError: clearTaskError } = useContext(TaskContext);
   
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -38,6 +29,7 @@ const ProjectDetail = () => {
       if (!isDeleting && id) {
         try {
           await fetchProjectById(id);
+          await fetchTasksByProject(id);
         } catch (err) {
           console.error('Error fetching project:', err);
         }
@@ -51,32 +43,28 @@ const ProjectDetail = () => {
       clearError();
       clearTaskError();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, isDeleting]);
+  }, [id, isDeleting, fetchProjectById, fetchTasksByProject, clearError, clearTaskError]);
 
   const handleDeleteClick = () => {
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
+    setDeleteDialogOpen(false);
+    setIsDeleting(true);
+    
     try {
-      setIsDeleting(true);
-      setDeleteDialogOpen(false);
-      
-      setTimeout(async () => {
-        await deleteProject(id);
-        navigate('/projects', { replace: true });
-      }, 50);
+      await deleteProject(id);
+      navigate('/projects');
     } catch (err) {
-      console.error("Delete failed:", err);
-      setDeleteDialogOpen(false);
+      console.error('Error deleting project:', err);
       setIsDeleting(false);
     }
   };
 
   if (loading && !isDeleting) {
     return (
-      <Box display="flex" justifyContent="center" my={3}>
+      <Box display="flex" justifyContent="center" mt={5}>
         <CircularProgress />
       </Box>
     );
@@ -84,26 +72,26 @@ const ProjectDetail = () => {
 
   if (error && !isDeleting) {
     return (
-      <Alert severity="error" sx={{ mt: 3, mb: 2 }}>
-        {error}
-      </Alert>
+      <Box mt={3}>
+        <Alert severity="error">{error}</Alert>
+      </Box>
     );
   }
 
   if ((!project && !loading) && !isDeleting) {
     return (
-      <Alert severity="info" sx={{ mt: 3, mb: 2 }}>
-        Project not found. It may have been deleted or you don't have access.
-      </Alert>
+      <Box mt={3}>
+        <Alert severity="warning">Project not found.</Alert>
+      </Box>
     );
   }
 
   // Show loading during deletion process
   if (isDeleting) {
     return (
-      <Box display="flex" flexDirection="column" alignItems="center" my={5}>
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" mt={5}>
         <CircularProgress />
-        <Typography sx={{ mt: 2 }}>Deleting project...</Typography>
+        <Typography variant="body1" mt={2}>Deleting project...</Typography>
       </Box>
     );
   }
