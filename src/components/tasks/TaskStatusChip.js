@@ -50,4 +50,4 @@ TaskStatusChip.propTypes = {
   status: PropTypes.string.isRequired
 };
 
-export default TaskStatusChip;
+export default React.memo(TaskStatusChip);
