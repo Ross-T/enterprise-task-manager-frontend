@@ -46,7 +46,7 @@ const TaskDetail = () => {
       await deleteTask(id);
       setDeleteDialogOpen(false);
       
-      if (returnPath && returnPath !== `/tasks/${id}`) {
+      if (returnPath) {
         navigate(returnPath);
       } else {
         navigate('/tasks');
