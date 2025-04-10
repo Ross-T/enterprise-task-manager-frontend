@@ -45,10 +45,15 @@ const TaskDetail = () => {
     try {
       await deleteTask(id);
       setDeleteDialogOpen(false);
-      navigate(returnPath);
+      
+      if (returnPath && returnPath !== `/tasks/${id}`) {
+        navigate(returnPath);
+      } else {
+        navigate('/tasks');
+      }
     } catch (err) {
-      setDeleteDialogOpen(false);
       console.error("Delete failed:", err);
+      setDeleteDialogOpen(false);
     }
   };
 
