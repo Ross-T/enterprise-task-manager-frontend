@@ -3,11 +3,19 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
 import { Box, CircularProgress } from '@mui/material';
 
+/**
+ * A route that requires authentication to access.
+ * Redirects to login if not authenticated, displays loading indicator while checking auth status.
+ * 
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components to render when authenticated
+ * @returns {React.ReactNode} The protected component or a redirect
+ */
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, initialCheckComplete } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  if (!initialCheckComplete || loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
         <CircularProgress />
@@ -16,10 +24,10 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    // Redirect to login but save the location they were trying to access
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // User is authenticated, render the protected content
   return children;
 };
 
