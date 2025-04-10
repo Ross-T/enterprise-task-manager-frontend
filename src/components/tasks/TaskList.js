@@ -97,6 +97,135 @@ const TaskList = ({ projectId, returnPath = "/tasks", isDeleting = false }) => {
     setTaskToDelete(null);
   };
 
+  const renderContent = () => {
+    if (error) {
+      return (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      );
+    }
+    
+    if (fetchError && projectId) {
+      return (
+        <Paper sx={{ p: 3, textAlign: "center" }}>
+          <Alert severity="info">
+            {fetchError}
+          </Alert>
+        </Paper>
+      );
+    }
+    
+    if (loading && tasks.length === 0) {
+      return (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="100px"
+        >
+          <CircularProgress />
+        </Box>
+      );
+    }
+    
+    if (tasks.length === 0) {
+      return (
+        <Paper sx={{ p: 3, textAlign: "center" }}>
+          <Typography variant="body1">
+            {projectId 
+              ? "No tasks found for this project. Add a task to get started!"
+              : "No tasks found. Create a new task to get started!"}
+          </Typography>
+        </Paper>
+      );
+    }
+    
+    return (
+      <Paper>
+        <List>
+          {tasks.map((task, index) => (
+            <React.Fragment key={task.id}>
+              {index > 0 && <Divider />}
+              <ListItem
+                alignItems="flex-start"
+                secondaryAction={
+                  <Box>
+                    <IconButton
+                      edge="end"
+                      aria-label="edit"
+                      onClick={() => handleEditClick(task.id)}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => handleDeleteClick(task)}
+                      sx={{ ml: 1 }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                }
+              >
+                <ListItemText
+                  primary={
+                    <Link
+                      to={`/tasks/${task.id}`}
+                      state={{ returnTo: returnPath }}
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      {task.title}
+                    </Link>
+                  }
+                  secondary={
+                    <Box sx={{ mt: 1 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        component="span"
+                        sx={{ display: "block", mb: 1 }}
+                      >
+                        {task.description
+                          ? task.description.length > 100
+                            ? `${task.description.substring(0, 100)}...`
+                            : task.description
+                          : "No description"}
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          flexWrap: "wrap",
+                          alignItems: "center",
+                        }}
+                      >
+                        <TaskStatusChip status={task.status} />
+                        <TaskPriorityChip priority={task.priority} />
+                        {task.projectName && (
+                          <Chip
+                            label={task.projectName}
+                            size="small"
+                            variant="outlined"
+                            component={Link}
+                            to={`/projects/${task.projectId}`}
+                            clickable
+                            sx={{ maxWidth: 150 }}
+                          />
+                        )}
+                      </Box>
+                    </Box>
+                  }
+                />
+              </ListItem>
+            </React.Fragment>
+          ))}
+        </List>
+      </Paper>
+    );
+  };
+
   return (
     <ErrorBoundary>
       <Box sx={{ mt: 3, mb: 3 }}>
@@ -123,120 +252,7 @@ const TaskList = ({ projectId, returnPath = "/tasks", isDeleting = false }) => {
           </Box>
         )}
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        {fetchError && projectId && (
-          <Paper sx={{ p: 3, textAlign: "center" }}>
-            <Alert severity="info" sx={{ mb: 2 }}>
-              {fetchError}
-            </Alert>
-          </Paper>
-        )}
-
-        {loading && tasks.length === 0 ? (
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            height="100px"
-          >
-            <CircularProgress />
-          </Box>
-        ) : tasks.length === 0 ? (
-          <Paper sx={{ p: 3, textAlign: "center" }}>
-            <Typography variant="body1">
-              {projectId 
-                ? "No tasks found for this project. Add a task to get started!"
-                : "No tasks found. Create a new task to get started!"}
-            </Typography>
-          </Paper>
-        ) : (
-          <Paper>
-            <List>
-              {tasks.map((task, index) => (
-                <React.Fragment key={task.id}>
-                  {index > 0 && <Divider />}
-                  <ListItem
-                    alignItems="flex-start"
-                    secondaryAction={
-                      <Box>
-                        <IconButton
-                          edge="end"
-                          aria-label="edit"
-                          onClick={() => handleEditClick(task.id)}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          onClick={() => handleDeleteClick(task)}
-                          sx={{ ml: 1 }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-                    }
-                  >
-                    <ListItemText
-                      primary={
-                        <Link
-                          to={`/tasks/${task.id}`}
-                          state={{ returnTo: returnPath }}
-                          style={{ textDecoration: "none", color: "inherit" }}
-                        >
-                          {task.title}
-                        </Link>
-                      }
-                      secondary={
-                        <Box sx={{ mt: 1 }}>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            component="span"
-                            sx={{ display: "block", mb: 1 }}
-                          >
-                            {task.description
-                              ? task.description.length > 100
-                                ? `${task.description.substring(0, 100)}...`
-                                : task.description
-                              : "No description"}
-                          </Typography>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              gap: 1,
-                              flexWrap: "wrap",
-                              alignItems: "center",
-                            }}
-                          >
-                            <TaskStatusChip status={task.status} />
-                            <TaskPriorityChip priority={task.priority} />
-                            {task.projectName && (
-                              <Chip
-                                label={task.projectName}
-                                size="small"
-                                variant="outlined"
-                                component={Link}
-                                to={`/projects/${task.projectId}`}
-                                clickable
-                                sx={{ maxWidth: 150 }}
-                              />
-                            )}
-                          </Box>
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                </React.Fragment>
-              ))}
-            </List>
-          </Paper>
-        )}
+        {renderContent()}
 
         <DeleteConfirmationDialog
           open={deleteDialogOpen}
