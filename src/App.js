@@ -16,6 +16,7 @@ import { ProjectProvider } from "./context/projectContext";
 
 // Components
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 
 // Pages
 import Login from "./components/auth/Login";
@@ -44,106 +45,126 @@ const theme = createTheme({
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AuthProvider>
-        <TaskProvider>
-          <ProjectProvider>
-            <Router>
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+    <ErrorBoundary>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <TaskProvider>
+            <ProjectProvider>
+              <Router>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
 
-                <Route path="/" element={<Layout />}>
-                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/" element={<Layout />}>
+                    <Route index element={<Navigate to="/dashboard" replace />} />
 
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
-                    }
-                  />
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <Dashboard />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
 
-                  <Route
-                    path="/tasks"
-                    element={
-                      <ProtectedRoute>
-                        <TasksPage />
-                      </ProtectedRoute>
-                    }
-                  />
+                    <Route
+                      path="/tasks"
+                      element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <TasksPage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
 
-                  <Route
-                    path="/tasks/create"
-                    element={
-                      <ProtectedRoute>
-                        <TaskCreatePage />
-                      </ProtectedRoute>
-                    }
-                  />
+                    <Route
+                      path="/tasks/create"
+                      element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <TaskCreatePage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
 
-                  <Route
-                    path="/tasks/edit/:id"
-                    element={
-                      <ProtectedRoute>
-                        <TaskEditPage />
-                      </ProtectedRoute>
-                    }
-                  />
+                    <Route
+                      path="/tasks/edit/:id"
+                      element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <TaskEditPage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
 
-                  <Route
-                    path="/tasks/:id"
-                    element={
-                      <ProtectedRoute>
-                        <TaskDetailPage />
-                      </ProtectedRoute>
-                    }
-                  />
+                    <Route
+                      path="/tasks/:id"
+                      element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <TaskDetailPage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
 
-                  <Route
-                    path="/projects"
-                    element={
-                      <ProtectedRoute>
-                        <ProjectsPage />
-                      </ProtectedRoute>
-                    }
-                  />
+                    <Route
+                      path="/projects"
+                      element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <ProjectsPage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
 
-                  <Route
-                    path="/projects/create"
-                    element={
-                      <ProtectedRoute>
-                        <ProjectCreatePage />
-                      </ProtectedRoute>
-                    }
-                  />
+                    <Route
+                      path="/projects/create"
+                      element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <ProjectCreatePage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
 
-                  <Route
-                    path="/projects/edit/:id"
-                    element={
-                      <ProtectedRoute>
-                        <ProjectEditPage />
-                      </ProtectedRoute>
-                    }
-                  />
+                    <Route
+                      path="/projects/edit/:id"
+                      element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <ProjectEditPage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
 
-                  <Route
-                    path="/projects/:id"
-                    element={
-                      <ProtectedRoute>
-                        <ProjectDetailPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                </Route>
-              </Routes>
-            </Router>
-          </ProjectProvider>
-        </TaskProvider>
-      </AuthProvider>
-    </ThemeProvider>
+                    <Route
+                      path="/projects/:id"
+                      element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <ProjectDetailPage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      }
+                    />
+                  </Route>
+                </Routes>
+              </Router>
+            </ProjectProvider>
+          </TaskProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
