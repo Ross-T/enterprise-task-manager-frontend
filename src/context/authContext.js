@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from "react";
+import React, { createContext, useContext, useReducer, useEffect, useState } from "react";
 import * as authService from "../api/authService";
 
 // Create context
@@ -8,7 +8,7 @@ export const AuthContext = createContext();
 const initialState = {
   isAuthenticated: Boolean(localStorage.getItem("token")),
   user: JSON.parse(localStorage.getItem("user")) || null,
-  loading: false,
+  loading: true,
   error: null,
 };
 
@@ -62,6 +62,7 @@ const authReducer = (state, action) => {
 // Provider component
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const [initialCheckComplete, setInitialCheckComplete] = useState(false);
 
   // Actions
   const login = async (credentials) => {
@@ -90,7 +91,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authService.register(userData);
       dispatch({ type: "REGISTER_SUCCESS", payload: response.data });
-
       return response.data;
     } catch (error) {
       dispatch({
@@ -116,10 +116,10 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       if (!token) {
         logout();
+        setInitialCheckComplete(true);
         return;
       }
 
-      // verify token on backend
       try {
         const isValid = await authService.verifyToken(token);
         if (isValid) {
@@ -133,7 +133,10 @@ export const AuthProvider = ({ children }) => {
           logout();
         }
       } catch (error) {
+        console.error("Token verification error:", error);
         logout();
+      } finally {
+        setInitialCheckComplete(true);
       }
     };
 
@@ -148,6 +151,7 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         clearError,
+        initialCheckComplete
       }}
     >
       {children}
