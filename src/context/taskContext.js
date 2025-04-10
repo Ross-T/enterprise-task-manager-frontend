@@ -1,10 +1,11 @@
 import React, { createContext, useReducer, useContext, useCallback } from "react";
 import * as taskService from "../api/taskService";
+import { CircuitBreaker } from "../utils/circuitBreaker";
 
-// Create context
+const circuitBreaker = new CircuitBreaker();
+
 export const TaskContext = createContext();
 
-// Initial state
 const initialState = {
   tasks: [],
   task: null,
@@ -102,17 +103,17 @@ const taskReducer = (state, action) => {
 export const TaskProvider = ({ children }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
 
-  // Actions
   const fetchTasks = useCallback(async (page = 0, size = 10) => {
     dispatch({ type: "FETCH_TASKS_REQUEST" });
     try {
-      const response = await taskService.getTasks(page, size);
+      const response = await circuitBreaker.call('task-service', 
+        () => taskService.getTasks(page, size));
       dispatch({ type: "FETCH_TASKS_SUCCESS", payload: response.data });
       return response.data;
     } catch (error) {
       dispatch({
         type: "TASK_ERROR",
-        payload: error.response?.data?.message || "Failed to fetch tasks",
+        payload: error.response?.data?.message || error.message || "Failed to fetch tasks",
       });
       throw error;
     }
@@ -121,17 +122,14 @@ export const TaskProvider = ({ children }) => {
   const fetchTasksByProject = useCallback(async (projectId, page = 0, size = 10) => {
     dispatch({ type: "FETCH_TASKS_REQUEST" });
     try {
-      const response = await taskService.getTasksByProject(
-        projectId,
-        page,
-        size
-      );
+      const response = await circuitBreaker.call('task-project-service', 
+        () => taskService.getTasksByProject(projectId, page, size));
       dispatch({ type: "FETCH_TASKS_SUCCESS", payload: response.data });
       return response.data;
     } catch (error) {
       dispatch({
         type: "TASK_ERROR",
-        payload: error.response?.data?.message || "Failed to fetch tasks",
+        payload: error.message || "Failed to fetch tasks for project",
       });
       throw error;
     }
@@ -140,13 +138,14 @@ export const TaskProvider = ({ children }) => {
   const fetchTasksByStatus = useCallback(async (status, page = 0, size = 10) => {
     dispatch({ type: "FETCH_TASKS_REQUEST" });
     try {
-      const response = await taskService.getTasksByStatus(status, page, size);
+      const response = await circuitBreaker.call('task-status-service', 
+        () => taskService.getTasksByStatus(status, page, size));
       dispatch({ type: "FETCH_TASKS_SUCCESS", payload: response.data });
       return response.data;
     } catch (error) {
       dispatch({
         type: "TASK_ERROR",
-        payload: error.response?.data?.message || "Failed to fetch tasks",
+        payload: error.message || "Failed to fetch tasks by status",
       });
       throw error;
     }
@@ -155,13 +154,14 @@ export const TaskProvider = ({ children }) => {
   const fetchTaskById = useCallback(async (id) => {
     dispatch({ type: "FETCH_TASK_REQUEST" });
     try {
-      const response = await taskService.getTaskById(id);
+      const response = await circuitBreaker.call('task-detail-service', 
+        () => taskService.getTaskById(id));
       dispatch({ type: "FETCH_TASK_SUCCESS", payload: response.data });
       return response.data;
     } catch (error) {
       dispatch({
         type: "TASK_ERROR",
-        payload: error.response?.data?.message || `Failed to fetch task with ID: ${id}`,
+        payload: error.message || `Failed to fetch task with ID: ${id}`,
       });
       throw error;
     }
@@ -170,13 +170,14 @@ export const TaskProvider = ({ children }) => {
   const createTask = useCallback(async (task) => {
     dispatch({ type: "CREATE_TASK_REQUEST" });
     try {
-      const response = await taskService.createTask(task);
+      const response = await circuitBreaker.call('task-create-service', 
+        () => taskService.createTask(task));
       dispatch({ type: "CREATE_TASK_SUCCESS", payload: response.data });
       return response.data;
     } catch (error) {
       dispatch({
         type: "TASK_ERROR",
-        payload: error.response?.data?.message || "Failed to create task",
+        payload: error.message || "Failed to create task",
       });
       throw error;
     }
@@ -185,13 +186,14 @@ export const TaskProvider = ({ children }) => {
   const updateTask = useCallback(async (id, task) => {
     dispatch({ type: "UPDATE_TASK_REQUEST" });
     try {
-      const response = await taskService.updateTask(id, task);
+      const response = await circuitBreaker.call('task-update-service', 
+        () => taskService.updateTask(id, task));
       dispatch({ type: "UPDATE_TASK_SUCCESS", payload: response.data });
       return response.data;
     } catch (error) {
       dispatch({
         type: "TASK_ERROR",
-        payload: error.response?.data?.message || "Failed to update task",
+        payload: error.message || "Failed to update task",
       });
       throw error;
     }
@@ -200,12 +202,13 @@ export const TaskProvider = ({ children }) => {
   const deleteTask = useCallback(async (id) => {
     dispatch({ type: "DELETE_TASK_REQUEST" });
     try {
-      await taskService.deleteTask(id);
+      await circuitBreaker.call('task-delete-service', 
+        () => taskService.deleteTask(id));
       dispatch({ type: "DELETE_TASK_SUCCESS", payload: id });
     } catch (error) {
       dispatch({
         type: "TASK_ERROR",
-        payload: error.response?.data?.message || "Failed to delete task",
+        payload: error.message || "Failed to delete task",
       });
       throw error;
     }
