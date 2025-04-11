@@ -70,7 +70,7 @@ This frontend application demonstrates several enterprise-level qualities:
     ```
 
 3.  **Configure Environment Variables:**
-    Create a `.env` file in the root project directory and make sure this files ISN'T committed (add it to .gitignore). Add the following variables:
+    Create a `.env` file in the root project directory and make sure this file ISN'T committed (add it to .gitignore). Add the following variables:
     ```dotenv
     # URL for the backend API instance
     REACT_APP_API_URL=http://localhost:8080/api
