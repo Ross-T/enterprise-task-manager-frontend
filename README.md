@@ -81,7 +81,6 @@ This frontend application demonstrates several enterprise-level qualities:
     ```
 
 ### Running the Application
-s
 1.  **Start the development server:**
     ```bash
     npm start
