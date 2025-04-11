@@ -118,4 +118,4 @@ This frontend application demonstrates several enterprise-level qualities:
 ## References
 
 * React, Material UI, Axios, Render
-* Generative AI tools were consulted and all final code/decisions were personally reviewed, understood, and adapted.
+* Generative AI tools were consulted and all final suggestions were personally reviewed, understood, and adapted.
