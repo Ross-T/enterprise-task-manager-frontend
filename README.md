@@ -1,197 +1,121 @@
 # Enterprise Task Manager - Frontend
 
-## Overview
+## Introduction
 
-This repository contains the frontend application for the Enterprise Task Manager system, a full-stack task management solution designed for enterprise environments. This React-based interface provides a user-friendly way to interact with the Enterprise Task Manager backend API.
+### Solution Overview
 
-## Project Aim & Objectives
+This repository contains the frontend of the Enterprise Task Manager application. It's built using React, with a user-friendly interface for interacting with the task management system. It communicates with the backend API (https://github.com/Ross-T/enterprise-task-manager-backend) to handle data and business logic. The UI is designed to be intuitive and responsive, using Material UI components.
 
-The Enterprise Task Manager frontend aims to provide an intuitive, responsive interface for task and project management with the following objectives:
+### Project Aim & Objectives
 
-1. Implement a secure authentication system with JWT tokens
-2. Create an intuitive dashboard for task and project visualisation
-3. Provide responsive design for mobile and desktop use
-4. Demonstrate enterprise-level frontend architecture patterns
+**Main Aim:** To develop a scalable, performance-optimised, secure, and robust user interface for the Enterprise Task Manager, demonstrating enterprise qualities.
 
-## Features
+**Key Objectives:**
 
-- **User Authentication**: Secure login/signup with JWT-based authentication
-- **Task Management**: Create, view, update, and delete tasks with various attributes
-- **Project Management**: Organise tasks within projects
-- **Dashboard**: Visual overview of tasks and projects
-- **Responsive Design**: Works seamlessly across desktop and mobile devices
+1.  **Secure User Authentication:** Use login and registration forms, handle JWT tokens securely, protect routes requiring authentication and integrate with Supabase Auth via the backend
+2.  **CRUD Functionality:** Create interfaces for viewing, creating, editing, and deleting projects and tasks.
+3.  **A Robust Application:** Implement client-side validation, display clear success/error responses and handle API errors gracefully.
+4.  **Implement Global Application State:** Use React Context API to implement global state across the application, like authentication status.
+5.  **A Responsive and User-friendly UI:** Use Material UI components to ensure usability across different screen sizes.
 
 ## Enterprise Considerations
 
-### Scalability
-- Component-based architecture allows for easy feature addition
-- Code splitting for optimised bundle sizes
-- Environment-based configuration for different deployment environments
+This frontend application demonstrates several enterprise-level qualities:
 
-### Security
-- Secure API communication with JWT authentication
-- Input validation and sanitisation
-- HTTPS enforcement in production
-- Environment variable management for sensitive information
+* **Performance:**
+    * **State Management:** React Context API is used to manage global state, to remove unnecessary re-renders.
+    * **Optimised API Calls:** Using Axios for HTTP requests and by fetching data efficiently within components and contexts.
+    * **Integrate With Backend Caching:** Utilise Spring caching from the backend to optimise loading times.
 
-### Performance
-- Optimised React component rendering
-- Material-UI with theming for consistent design
-- Lazy loading of components where appropriate
+* **Scalability:**
+    * **Component-Based and Modular Architecture:** Built with React components and organised into separated folders (`pages`, `components`, `api`, `context`, `utils`), making it easier to maintain and extend.
+    * **Centralised API Configuration:** API interaction logic is split into service files (`projectService.js`, `taskService.js`, `authService.js`) and the configuration is centralised in (`axiosConfig.js`), making updates simpler.
+    * **Handle High Concurrent Users Using a Circuit Breaker:** Using a `CircuitBreaker` (`src/utils/circuitBreaker.js`) for API calls prevents repeated calls to a failing backend service, helping to maintain frontend availability, responsiveness during backend outages and improving stability. This allows increasing numbers of concurrent users to be managed by preventing requests to overwhelmed services.
 
-## Technology Stack
+* **Robustness:**
+    * **Error Boundaries:** The `ErrorBoundary` component wraps critical parts of the application to catch JavaScript errors in child components, preventing a full application crash and displaying a fallback UI. (`src/components/common/ErrorBoundary.js`)
+    * **Graceful API Error Handling:** API service functions include `.catch` blocks to handle request errors and produce graceful user feedback, complementing the Circuit Breaker.
+    * **User Input Validation:** User-input forms include client-side validation checks (e.g., email format checks) to provide immediate feedback.
 
-- **React 19**: Modern UI framework
-- **React Router**: For navigation and routing
-- **Material UI**: Component library for a consistent design system
-- **Axios**: HTTP client for API requests
-- **React Context API**: For state management
+* **Security:**
+    * **Token-Based Authentication:** Interacts with the backend using JWT. Tokens are received upon login/registration (via the backend/Supabase) and stored via `authContext.js`.
+    * **Protected Routes:** The `ProtectedRoute` component (`src/components/common/ProtectedRoute.js`) restricts access based on authentication status.
+    * **Secure API Communication:** Sends the JWT token in the Authorisation header (`src/api/axiosConfig.js`). HTTPS is implemented via Render (the deployment platform).
+    * **Supabase Integration:** Uses Supabase secure authentication via the backend.
 
-## Getting Started
+* **Deployment:**
+    * **Environment Configuration:** Uses `.env` files for backend API URL (`REACT_APP_API_URL`) and Supabase details (`REACT_APP_SUPABASE_URL`, `REACT_APP_SUPABASE_ANON_KEY`). See `src/api/config.js`.
+    * **Hosting Platform:** Deployed on Render across two environments (dev and prod).
+
+## Installation & Usage Instructions
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- npm (v7 or higher)
-- Access to the Enterprise Task Manager backend API
+* Node.js v18+
+* npm
+* Git
+* A running instance of the [Enterprise Task Manager Backend API](https://github.com/Ross-T/enterprise-task-manager-backend) configured with its own environment variables
 
-### Installation
+### Setup Steps
 
-1. Clone the repository:
-   `git clone https://github.com/Ross-T/enterprise-task-manager-frontend.git`
-   `cd enterprise-task-manager-frontend`
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/Ross-T/enterprise-task-manager-frontend.git
+    cd enterprise-task-manager-frontend
+    ```
 
-2. Install dependencies:
-   `npm install`
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-3. Create a `.env.development.local` file for configuration:
-   `REACT_APP_API_URL=http://localhost:8080/api`
+3.  **Configure Environment Variables:**
+    Create a `.env` file in the root project directory and make sure this file ISN'T committed (add it to .gitignore). Add the following variables:
+    ```dotenv
+    # URL for the backend API instance
+    REACT_APP_API_URL=http://localhost:8080/api
 
-4. Start the development server:
-   `npm start`
+    # Supabase details (replace placeholders)
+    REACT_APP_SUPABASE_URL=https://<supabase_project_ref>.supabase.co
+    REACT_APP_SUPABASE_ANON_KEY=<supabase_anon_key>
+    ```
 
-5. Open [http://localhost:3000](http://localhost:3000) to view the application.
+### Running the Application
+1.  **Start the development server:**
+    ```bash
+    npm start
+    ```
+2.  Open your web browser and navigate to `http://localhost:3000`.
 
-## Available Scripts
+## Feature Overview
 
-- `npm start`: Runs the app in development mode
-- `npm test`: Launches the test runner
-- `npm run build`: Builds the app for production
-- `npm run eject`: Ejects the app from Create React App (irreversible)
-
-## Project Structure
-
-src/
-├── api/           # API integration and services
-├── assets/        # Static assets (images, fonts)
-├── components/    # Reusable UI components
-├── context/       # React context for state management
-├── hooks/         # Custom React hooks
-├── pages/         # Page components for routes
-├── utils/         # Utility functions
-├── App.js         # Main application component
-└── index.js       # Application entry point
-
-## API Integration
-
-This frontend application communicates with the Enterprise Task Manager backend API. The API base URL is configured through environment variables:
-
-- Development: `http://localhost:8080/api`
-- Production: Set via `REACT_APP_API_URL` in deployment environment
-
-API requests are managed through service modules in the `src/api` directory, with authentication handled automatically via JWT tokens.
-
-## Deployment
-
-### Build for Production
-
-`npm run build`
-
-This creates an optimised production build in the `build` folder.
-
-### Deployment Options
-
-The application can be deployed to:
-
-1. **Static hosting services** like Netlify, Vercel, or GitHub Pages
-2. **Cloud platforms** such as AWS S3 + CloudFront, Azure Static Web Apps
-3. **Traditional hosting** by serving the build directory from a web server
-
-Remember to configure the `REACT_APP_API_URL` environment variable to point to your deployed backend API.
+| Feature               | Purpose                                                       | Code Locations                                                                                                | Context                                                                |
+| :-------------------- | :------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
+| User Authentication | Allows users to register and log in via the backend/Supabase.     | `src/pages/LoginPage.js`, `src/pages/RegisterPage.js`, `src/components/auth/Login.js`, `src/components/auth/Register.js`, `src/api/authService.js` | Uses `authContext` for state and token management. Interacts with backend `/auth`. |
+| Project Management    | CRUD operations for projects.                                 | `src/pages/ProjectsPage.js`, `src/pages/ProjectDetailPage.js`, `src/pages/ProjectCreatePage.js`, `src/pages/ProjectEditPage.js`, `src/components/projects/*`, `src/api/projectService.js` | Uses `projectContext`. Interacts with backend `/projects`.                   |
+| Task Management       | CRUD operations for tasks.                    | `src/pages/TasksPage.js`, `src/pages/TaskDetailPage.js`, `src/pages/TaskCreatePage.js`, `src/pages/TaskEditPage.js`, `src/components/tasks/*`, `src/api/taskService.js` | Uses `taskContext`. Interacts with backend `/tasks`.                         |
+| Route Protecting   | Secures routes requiring login.                               | `src/components/common/ProtectedRoute.js`, Route logic within `src/App.js`                                                           | Uses `authContext` to check authentication.                                   |
+| Error Handling        | Catches application errors and handles API failures.          | `src/components/common/ErrorBoundary.js`, `src/utils/circuitBreaker.js`, Error handling within API service calls. | Provides fallback UI and user feedback.                                                 |
+| Responsive Layout     | Adapts the application to different screen sizes.             | `src/components/layout/Layout.js`, Use of Material UI.                                                 | Core layout structure.                                                                  |
 
 ## Known Issues & Future Enhancements
 
-- **Offline Support**: Add service workers for offline capability
-- **Mobile App**: Potential for React Native conversion
-- **Performance Monitoring**: Integrate analytics for performance tracking
-- **Accessibility Improvements**: Further enhance accessibility compliance
+* **Known Issues:**
+    * Incomplete/failing test suites.
+    * Limited client-side validation.
+    * Using `localStorage` for JWT storage has security implications.
+    * All users who log in will see the same instance of the app e.g. all tasks made by other users (suitable for internal business use, not suitable for external use)
+* **Potential Future Enhancements:**
+    * Implement comprehensive testing.
+    * Enhance client-side validation.
+    * Refine UI/UX.
+    * Implement a more secure token handling strategy.
+    * Add features like task filtering, sorting, searching.
+    * Implement a Kanban-style UI grid
+    * Allow different users to have different instances of the app
+    * Implement user roles
 
-## License
+## References
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Created as part of enterprise software engineering coursework
-- UI design inspired by industry-standard task management solutions
-
-## Quality Assurance
-
-### Testing Strategy
-
-This project employs a comprehensive testing approach across multiple levels:
-
-- **Unit Tests**: Individual components and services are tested in isolation using Jest and React Testing Library
-- **Integration Tests**: API services and component interactions are tested to verify proper communication
-- **E2E Tests**: Cypress is used for end-to-end tests that simulate real user interactions
-- **Coverage Goals**: Maintain >80% code coverage for critical application paths
-
-Test configurations are maintained in separate environments to ensure consistency between local development and CI pipeline execution.
-
-### Code Quality
-
-We maintain high code quality standards through:
-
-- **Static Analysis**: ESLint enforces coding standards with custom rule configuration
-- **Code Formatting**: Prettier ensures consistent code style across the codebase
-- **Pre-commit Hooks**: Husky prevents commits that don't meet quality standards
-- **Code Reviews**: Pull request reviews required with at least one approval
-- **Type Safety**: PropTypes validation for all components with consideration for TypeScript migration
-
-### Accessibility
-
-The application follows WCAG 2.1 AA standards:
-
-- Semantic HTML structure
-- Keyboard navigation support
-- Screen reader compatibility
-- Sufficient colour contrast
-- Focus management
-
-## Development Workflow
-
-### CI/CD Pipeline
-
-This project uses a modern continuous integration and deployment workflow:
-
-- **Continuous Integration**: GitHub Actions automatically runs tests on every pull request
-- **Automated Testing**: Unit, integration, and E2E tests run in the CI environment
-- **Build Verification**: Production builds are created and verified before deployment
-- **Deployment Automation**: Successful builds on the main branch trigger automatic deployment
-- **Environment Management**: Separate pipelines for staging and production environments
-
-The CI/CD configuration files are maintained in the `.github/workflows` directory.
-
-### Branching Strategy
-
-We follow a GitFlow-inspired branching strategy:
-
-- `main`: Production-ready code
-- `develop`: Integration branch for features
-- `feature/*`: Individual feature branches
-- `hotfix/*`: Urgent production fixes
-
-Pull requests require passing CI checks and code review approval before merging.
-
-### Backend Reference
-This frontend application communicates with the [Enterprise Task Manager Backend](https://github.com/Ross-T/enterprise-task-manager-backend) API.
+* React, Material UI, Axios, Render
+* Generative AI tools were consulted and all final code/decisions were personally reviewed, understood, and adapted.
